@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen: Discover Movies and TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;color-scheme:dark;padding-bottom:env(safe-area-inset-bottom,0px);
+ --bg:#05070d;--panel:rgba(12,15,24,.78);--line:rgba(255,255,255,.12);--ink:#f3f4f7;--muted:#b4b8c4;--cream:#f6edd1;--star:#f5c518;
+ --o1:#f0904f;--o2:#d9693a;--font:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;--disp:"Anton","Arial Narrow Bold",Impact,sans-serif;--h:20}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);overflow-x:hidden}
+.pill{position:fixed;z-index:20;top:calc(env(safe-area-inset-top,0px) + 2px);left:50%;transform:translateX(-50%);width:min(896px,calc(100% - 24px));height:56px;
+ display:flex;align-items:center;gap:6px;padding:0 14px 0 22px;border:1px solid var(--line);border-radius:999px;background:var(--panel);backdrop-filter:blur(14px)}
+.mark{background:none;border:0;padding:0;cursor:pointer;margin-right:14px;display:grid}
+.mark svg{width:30px;height:34px}
+.pill nav{display:flex;gap:2px;margin-right:auto}
+.pill nav a{color:var(--muted);text-decoration:none;font-weight:500;font-size:.93rem;padding:8px 15px;border-radius:999px}
+.pill nav a:hover,.pill nav a[aria-current]{color:#fff}
+.ic{background:none;border:0;color:var(--muted);width:34px;height:34px;display:grid;place-items:center;cursor:pointer;border-radius:50%}
+.ic:hover{color:#fff}.ic svg{width:19px;height:19px}
+.user{display:flex;align-items:center;gap:10px;margin-left:8px;font-weight:600;font-size:.93rem;background:none;border:0;color:var(--ink);cursor:pointer;font-family:inherit}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#ff9b47,#e8672a);display:grid;place-items:center;font-size:.72rem;font-weight:800}
+:is(.pill a,.ic,.user,.mark,.btn,.dots button,.poster,.x,.joinbtn):focus-visible{outline:3px solid var(--o1);outline-offset:2px}
+.stage{position:relative;min-height:min(720px,84vh);display:flex;align-items:flex-end;padding:120px 60px 70px;overflow:hidden;
+ background:radial-gradient(ellipse 70% 60% at 62% 38%,hsl(var(--h) 45% 20%),transparent 70%),radial-gradient(ellipse 80% 40% at 50% 100%,hsl(var(--h) 40% 15%),transparent 75%),var(--bg);transition:background .6s}
+.mosaic{position:absolute;right:max(4%,0px);top:56px;width:min(640px,62%);height:calc(100% - 40px);display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(8,1fr);gap:1px;
+ -webkit-mask-image:radial-gradient(ellipse 46% 52% at 50% 46%,#000 35%,transparent 78%);mask-image:radial-gradient(ellipse 46% 52% at 50% 46%,#000 35%,transparent 78%);opacity:.95}
+.mosaic i{background:hsl(var(--h) 38% 28%)}
+.shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,7,13,.92) 0,rgba(5,7,13,.45) 38%,transparent 62%),linear-gradient(0deg,var(--bg) 0,transparent 32%)}
+.copy{position:relative;max-width:620px;transition:opacity .35s}
+.copy.out{opacity:0}
+h1{font-family:var(--disp);font-weight:400;font-size:clamp(3.4rem,9.4vw,7.2rem);line-height:.92;letter-spacing:.01em;color:var(--cream);margin:0 0 20px;text-transform:uppercase;text-shadow:0 4px 30px rgba(0,0,0,.4)}
+.meta{display:flex;align-items:center;flex-wrap:wrap;gap:12px;font-weight:600;font-size:.95rem;margin-bottom:18px;color:#e5e7ee}
+.meta .d{color:var(--muted)}
+.ring{position:relative;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:800;background:conic-gradient(var(--star) calc(var(--p)*1%),rgba(255,255,255,.2) 0)}
+.ring::before{content:"";position:absolute;inset:3px;border-radius:50%;background:#0b0e16}.ring b{position:relative}
+.rated{border:1px solid var(--line);background:rgba(255,255,255,.08);border-radius:999px;min-width:30px;height:26px;display:grid;place-items:center;font-size:.72rem;font-weight:800;padding:0 8px}
+.desc{margin:0 0 26px;font-size:1.08rem;line-height:1.55;color:#d9dce6;max-width:60ch}
+.btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;font-size:.98rem;display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 24px;border-radius:999px;cursor:pointer;color:#fff;border:1px solid var(--line);background:rgba(20,24,34,.8)}
+.btn svg{width:18px;height:18px}
+.btn.play{background:linear-gradient(180deg,var(--o1),var(--o2));border-color:transparent;color:#1a0d05;box-shadow:0 8px 28px rgba(240,144,79,.35)}
+.dots{position:absolute;left:0;right:0;bottom:30px;display:flex;justify-content:center;gap:8px}
+.dots button{width:6px;height:6px;border-radius:99px;border:0;background:rgba(255,255,255,.35);padding:0;cursor:pointer;transition:width .25s,background .25s}
+.dots button[aria-current="true"]{width:24px;background:#fff}
+.rows{padding:10px 0 60px;background:linear-gradient(180deg,var(--bg),hsl(var(--h) 30% 8%))}
+.rows h2{font-size:1.4rem;font-weight:600;margin:20px 60px 22px}
+.row{display:flex;overflow-x:auto;padding:0 60px 20px;scroll-snap-type:x proximity;scrollbar-width:none}
+.row::-webkit-scrollbar{display:none}
+.item{position:relative;flex:0 0 240px;height:214px;scroll-snap-align:start}
+.num{position:absolute;left:-2px;bottom:-26px;font-weight:800;font-size:210px;line-height:1;letter-spacing:-.06em;color:#0a0e17;-webkit-text-stroke:3px #2f3d52;user-select:none}
+.poster{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;left:88px;top:0;width:140px;height:210px;border-radius:9px;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;
+ padding:12px 8px;text-align:center;font-family:var(--disp);font-size:1.1rem;line-height:1.05;letter-spacing:.05em;text-transform:uppercase;color:var(--cream);
+ background:radial-gradient(circle at 50% 30%,hsl(var(--c) 70% 55%/.85),transparent 55%),linear-gradient(170deg,hsl(var(--c) 55% 30%),hsl(calc(var(--c) + 40) 60% 10%));
+ box-shadow:0 10px 24px rgba(0,0,0,.5);transition:transform .2s}
+.poster:hover{transform:translateY(-6px) scale(1.04)}
+.join{position:fixed;z-index:25;right:20px;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:min(342px,calc(100% - 40px));background:rgba(14,17,26,.96);border:1px solid var(--line);border-radius:18px;padding:16px 16px 16px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.join b{display:block;font-size:.95rem;margin-bottom:6px}.join p{margin:0 0 14px;color:var(--muted);font-size:.9rem;line-height:1.5;padding-right:10px}
+.x{position:absolute;right:10px;top:8px;width:28px;height:28px;border:0;background:none;color:var(--muted);cursor:pointer;font-size:1.2rem}
+.joinbtn{width:100%;height:40px;border-radius:999px;border:0;background:#fff;color:#0b0e16;font:inherit;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+.joinbtn svg{width:18px;height:18px}
+#toast{position:fixed;left:50%;top:calc(80px + env(safe-area-inset-top,0px));transform:translateX(-50%);background:#fff;color:#0b0e16;padding:10px 18px;border-radius:999px;font-weight:600;font-size:.9rem;z-index:40;display:none}
+[hidden]{display:none!important}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (max-width:760px){.pill nav{display:none}.pill{padding-left:16px}.mark{margin-right:auto}.stage{padding:110px 22px 64px}.rows h2,.row{padding-left:22px;margin-left:0}.rows h2{margin-left:22px}.mosaic{width:100%;right:0;opacity:.6}.user span{display:none}}
+.pad{padding:116px 60px 60px;min-height:70vh}.pad h1{font-family:var(--font);font-weight:800;text-transform:none;font-size:clamp(1.8rem,4vw,2.6rem);color:#fff;margin:0 0 26px;line-height:1.1;text-shadow:none}
+.pad2{padding:0 60px 70px;background:linear-gradient(180deg,var(--bg),hsl(var(--h) 30% 8%))}.pad2 h2{font-size:1.4rem;font-weight:600;margin:30px 0 16px}
+.stage.detail{min-height:min(560px,76vh)}
+.bgimg{position:absolute;inset:0;background-size:cover;background-position:center right}
+.poster.img{background-size:cover;background-position:center;color:transparent;font-size:0}
+.poster.gp{position:relative;left:auto;top:auto;width:100%;height:auto;aspect-ratio:2/3}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:24px}
+.pc{display:grid;gap:8px;align-content:start}.pc b,.mini b{font-size:.92rem;font-weight:600}.pc span,.note{color:var(--muted);font-size:.88rem}
+.mini{flex:0 0 150px;margin-right:20px;display:grid;gap:8px;align-content:start}
+.prov{display:flex;flex-wrap:wrap;gap:12px}
+.pv{display:inline-flex;gap:8px;align-items:center;padding:11px 18px;border-radius:999px;border:1px solid var(--line);background:rgba(20,24,34,.8);color:#fff;text-decoration:none;font-weight:600}
+.pv small{color:var(--muted);font-weight:500}
+.sk{border-radius:10px;background:linear-gradient(90deg,#10151f,#1b2332,#10151f);background-size:200% 100%;animation:sh 1.4s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.err{max-width:460px;border:1px solid var(--line);border-radius:18px;padding:22px;background:rgba(14,17,26,.8)}.err p{color:var(--muted)}
+.sbar{position:fixed;z-index:19;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 66px);width:min(896px,calc(100% - 24px))}
+.sbar input{width:100%;height:46px;border-radius:999px;border:1px solid var(--line);background:rgba(12,15,24,.95);color:#fff;font:inherit;padding:0 22px}
+.foot{padding:26px 60px 40px;color:var(--muted);font-size:.84rem;border-top:1px solid var(--line)}
+@media (max-width:760px){.pad,.pad2,.foot{padding-left:22px;padding-right:22px}.pad{padding-top:100px}}
+</style>
+</head>
+<body>
+<header class="pill">
+ <button class="mark" type="button" data-go="/" aria-label="Lumen home"><svg viewBox="0 0 30 34" aria-hidden="true"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fd0ff"/><stop offset="1" stop-color="#0e5d8a"/></linearGradient></defs><path d="M15 1 26 31 15 25 4 31Z" fill="url(#g)"/></svg></button>
+ <nav aria-label="Main"><a href="#/" data-r="">Discover</a><a href="#/movies" data-r="movies">Movies</a><a href="#/tv" data-r="tv">TV Shows</a><a href="#/soon/parties" data-r="soon">Watch Parties</a><a href="#/soon/live" data-r="soon">Live TV</a></nav>
+ <button class="ic" type="button" aria-label="Games"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 8h10a5 5 0 0 1 4.8 6.4l-.6 2.3a2.5 2.5 0 0 1-4.1 1.2L15 16H9l-2.1 1.9a2.5 2.5 0 0 1-4.1-1.2l-.6-2.3A5 5 0 0 1 7 8Zm.5 2.5v1.2H6.3v1.3h1.2v1.2h1.3V13H10v-1.3H8.8v-1.2Zm9 .3a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm-1.8 1.8a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg></button>
+ <button class="ic" type="button" aria-label="Community chat"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm4.5 6a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6Zm7 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6Z"/></svg></button>
+ <button class="ic" type="button" id="sbtn" aria-label="Search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+ <button class="user" type="button" data-t="Sign in is coming soon"><span class="av">G</span><span>Guest</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+</header>
+<form class="sbar" id="sform" role="search" hidden><input id="sq" type="search" placeholder="Search movies and TV shows" aria-label="Search"></form>
+
+<main id="app" tabindex="-1"></main>
+<footer class="foot">Titles, posters and metadata come from your data provider. Add any attribution the provider requires here.</footer>
+
+<aside class="join" id="join" role="complementary" aria-label="Community">
+ <button class="x" id="jx" type="button" aria-label="Dismiss">×</button>
+ <b>Join our community</b><p>Get status updates, share feedback, and get help with any issues.</p>
+ <button class="joinbtn" type="button" data-t="Community link would go here"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-7l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg>Join community</button>
+</aside>
+<div id="toast" role="status"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+const hueOf=s=>[...String(s)].reduce((a,c)=>(a*31+c.charCodeAt(0))%360,7);
+
+/* ================= HOW TO CONNECT YOUR API =================
+ 1. Set useMock to false and apiBase to your server URL (e.g. "/api").
+ 2. Your server needs these routes (keys stay on the server):
+      GET /trending?type=tv|movie   -> { results: [...] }
+      GET /title?type=..&id=..      -> one title object
+      GET /search?q=..              -> { results: [...] }
+      GET /providers?type=..&id=..  -> { providers: [{name,url,kind}] }
+ 3. If your API uses different field names, edit normalize() below. Nothing else needs to change.
+ 4. Add any attribution your data provider requires to the footer.
+============================================================= */
+const CONFIG={useMock:true,apiBase:"/api",imgBase:""};
+
+function normalize(raw,type){const t=raw.title||raw.name||"Untitled";return{
+ id:raw.id,type:raw.media_type||type,title:t,
+ year:(raw.release_date||raw.first_air_date||"").slice(0,4),
+ genres:(raw.genres||[]).map(g=>g.name),rating:raw.vote_average??null,age:raw.certification||"",
+ overview:raw.overview||"",poster:raw.poster_path?CONFIG.imgBase+raw.poster_path:"",
+ backdrop:raw.backdrop_path?CONFIG.imgBase+raw.backdrop_path:"",trailer:raw.trailer_url||"",hue:hueOf(t)}}
+
+const j=async p=>{const r=await fetch(CONFIG.apiBase+p);if(!r.ok)throw new Error("Request failed ("+r.status+")");return r.json()};
+const API={
+ trending:async type=>CONFIG.useMock?MOCK.list(type):(await j("/trending?type="+type)).results.map(r=>normalize(r,type)),
+ details:async(type,id)=>CONFIG.useMock?MOCK.one(type,id):normalize(await j(`/title?type=${type}&id=${id}`),type),
+ search:async q=>CONFIG.useMock?MOCK.search(q):(await j("/search?q="+encodeURIComponent(q))).results.map(r=>normalize(r,r.media_type)),
+ providers:async(type,id)=>CONFIG.useMock?MOCK.providers():((await j(`/providers?type=${type}&id=${id}`)).providers||[])};
+
+/* ---------- placeholder data (used only while useMock is true) ---------- */
+const S=[
+["Nightfall Protocol",20,2026,"Thriller / Drama","R",7.2,"When a city official's son is taken, his parents have one night to raise an impossible sum. Every favour they call in costs more than the last..."],
+["Salt Harbor",200,2026,"Mystery / Crime","TV-MA",7.8,"A quiet fishing town is shaken when a lighthouse keeper vanishes. The detective sent to find him learns the town has kept the same secret for decades..."],
+["Ember Court",345,2025,"Drama","TV-14",8.1,"Three rival families fight for control of a failing vineyard, and the one heir who wants nothing to do with it holds the deciding vote..."],
+["Static Bloom",140,2026,"Sci-Fi / Adventure","PG-13",7.5,"A radio engineer picks up a signal that shouldn't exist, and tracing it leads her across a continent she thought she knew..."],
+["Paper Moons",270,2024,"Fantasy / Family","PG",8.4,"Two siblings fold a paper boat that carries them to a lantern-lit sea, where every story ever told is waiting to be finished..."],
+["The Long Dusk",45,2026,"Western / Action","R",7.0,"A retired marshal takes one last job guarding a train across the desert, only to learn the cargo is the least dangerous thing on board..."]];
+const TVX=[["Glass Orchard",210],["Hollow Kings",290],["Night Ferry",175],["Iron Season",15],["Low Tide",190],["Velvet Signal",330]];
+const MV=[["Moth & Flame",25],["Seventh Door",260],["Winter Cadence",205],["Open Water",185],["Blue Hour",230],["Last Orbit",300],["Dry Season",35],["Fox Street",350],["Paper Tigers",80],["Afterglow",320],["Cold Mile",120],["Small Hours",240]];
+const GEN="Placeholder synopsis. Your API will supply the real description, poster, and backdrop for this title.";
+const mk=(a,type,p)=>a.map((d,i)=>({id:p+i,type,title:d[0],hue:d[1],year:d[2]||2026,genres:(d[3]||"Drama").split(" / "),age:d[4]||"TV-14",rating:d[5]??+(6.4+((i*7)%27)/10).toFixed(1),overview:d[6]||GEN,poster:"",backdrop:"",trailer:""}));
+const LISTS={tv:mk([...S,...TVX],"tv","tv"),movie:mk(MV,"movie","mv")};
+const wait=v=>new Promise(r=>setTimeout(()=>r(v),300));
+const MOCK={list:t=>wait(LISTS[t]),one:(t,id)=>wait(LISTS[t].find(x=>String(x.id)===String(id))||LISTS[t][0]),
+ search:q=>wait([...LISTS.tv,...LISTS.movie].filter(x=>x.title.toLowerCase().includes(q.toLowerCase()))),
+ providers:()=>wait([{name:"Streaming service A",url:"#",kind:"Stream"},{name:"Streaming service B",url:"#",kind:"Rent"}])};
+
+/* ---------- rendering helpers ---------- */
+const PLAY='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 4v16l14-8Z"/></svg>';
+const poster=(d,cls,x="")=>`<button class="${cls}${d.poster?" img":""}" type="button" data-go="/title/${d.type}/${esc(d.id)}" style="${d.poster?`background-image:url('${esc(d.poster)}')`:`--c:${d.hue}`}" ${x}>${d.poster?"":esc(d.title)}</button>`;
+const metaHTML=d=>`<div class="meta">${d.rating!=null?`<span class="ring" style="--p:${d.rating*10}"><b>${(+d.rating).toFixed(1)}</b></span><span class="d">·</span>`:""}<span>${esc(d.year)}</span><span class="d">·</span><span>${esc(d.genres.join(" / "))}</span>${d.age?`<span class="d">·</span><span class="rated">${esc(d.age)}</span>`:""}</div>`;
+const cells=h=>Array.from({length:56},()=>`<i style="background:hsl(${h+Math.random()*20-10} ${30+Math.random()*25}% ${14+Math.random()*30}%)"></i>`).join("");
+const bgHTML=d=>d.backdrop?`<div class="bgimg" style="background-image:url('${esc(d.backdrop)}')"></div>`:`<div class="mosaic" aria-hidden="true">${cells(d.hue)}</div>`;
+const top10=l=>l.slice(0,10).map((d,i)=>`<div class="item"><span class="num" aria-hidden="true">${i+1}</span>${poster(d,"poster",`aria-label="${i+1}. ${esc(d.title)}"`)}</div>`).join("");
+const grid=l=>`<div class="pgrid">${l.map(d=>`<div class="pc">${poster(d,"poster gp",`aria-label="${esc(d.title)}"`)}<b>${esc(d.title)}</b><span>${esc(d.year)}${d.rating!=null?" · ★ "+(+d.rating).toFixed(1):""}</span></div>`).join("")}</div>`;
+const skel=()=>`<div class="pad"><div class="sk" style="height:48px;width:260px;margin-bottom:26px"></div><div class="row" style="padding:0">${'<div class="sk" style="flex:0 0 140px;height:210px;margin-right:20px"></div>'.repeat(8)}</div></div>`;
+const app=$("app");let rid=0,timer,cur=0,slides=[];
+function toast(t){const e=$("toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2200)}
+function fail(id,e,retry){if(id!==rid)return;app.innerHTML=`<div class="pad"><div class="err"><b>Couldn't load this page</b><p>${esc(e.message||e)}</p><button class="btn" id="retry" type="button">Try again</button></div></div>`;$("retry").onclick=retry}
+
+/* ---------- pages ---------- */
+async function home(){const id=++rid;app.innerHTML=skel();
+ try{const [tv,mv]=await Promise.all([API.trending("tv"),API.trending("movie")]);if(id!==rid)return;
+  slides=tv.slice(0,6);
+  app.innerHTML=`<section class="stage" aria-label="Featured"><div id="hbg"></div><div class="shade"></div><div class="copy" id="copy"><h1 id="ttl"></h1><div id="hmeta"></div><p class="desc" id="ds"></p>
+   <div class="btns"><button class="btn play" type="button" data-play="1">${PLAY}Play trailer</button><button class="btn" id="more" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/></svg>More Info</button></div></div><div class="dots" id="dots"></div></section>
+   <section class="rows"><h2>Top 10 TV Shows Today</h2><div class="row">${top10(tv)}</div><h2>Top 10 Movies Today</h2><div class="row">${top10(mv)}</div></section>`;
+  $("dots").innerHTML=slides.map(s=>`<button type="button" aria-label="Show ${esc(s.title)}"></button>`).join("");
+  $("dots").onclick=e=>{const k=[...$("dots").children].indexOf(e.target.closest("button"));if(k>-1){show(k);auto()}};
+  show(0,true);auto()}catch(e){fail(id,e,home)}}
+function show(i,instant){cur=i;const d=slides[i],c=$("copy");if(!c)return;
+ const apply=()=>{if(!$("copy"))return;document.documentElement.style.setProperty("--h",d.hue);window.__cur=d;$("hbg").innerHTML=bgHTML(d);$("ttl").textContent=d.title;$("hmeta").innerHTML=metaHTML(d);
+  $("ds").textContent=d.overview.length>180?d.overview.slice(0,177)+"...":d.overview;$("more").dataset.go=`/title/${d.type}/${d.id}`;c.classList.remove("out");
+  [...$("dots").children].forEach((x,k)=>x.setAttribute("aria-current",k===i))};
+ if(instant)apply();else{c.classList.add("out");setTimeout(apply,300)}}
+function auto(){clearInterval(timer);if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;timer=setInterval(()=>show((cur+1)%slides.length),7500)}
+async function listPage(type){const id=++rid;app.innerHTML=skel();
+ try{const l=await API.trending(type);if(id!==rid)return;app.innerHTML=`<div class="pad"><h1>${type==="tv"?"TV Shows":"Movies"}</h1>${grid(l)}</div>`}catch(e){fail(id,e,()=>listPage(type))}}
+async function searchPage(q){const id=++rid;app.innerHTML=skel();
+ try{const l=q?await API.search(q):[];if(id!==rid)return;app.innerHTML=`<div class="pad"><h1>${q?`Results for "${esc(q)}"`:"Search"}</h1>${l.length?grid(l):`<p class="note">${q?"No matches. Try a different spelling or a shorter search.":"Type a title in the search bar."}</p>`}</div>`}catch(e){fail(id,e,()=>searchPage(q))}}
+async function detail(type,idv){const id=++rid;app.innerHTML=skel();
+ try{const [d,more]=await Promise.all([API.details(type,idv),API.trending(type)]);if(id!==rid)return;window.__cur=d;document.documentElement.style.setProperty("--h",d.hue);
+  app.innerHTML=`<section class="stage detail"><div id="hbg">${bgHTML(d)}</div><div class="shade"></div><div class="copy"><h1>${esc(d.title)}</h1>${metaHTML(d)}<p class="desc">${esc(d.overview)}</p>
+   <div class="btns"><button class="btn play" type="button" data-play="1">${PLAY}Play trailer</button><button class="btn" type="button" data-t="Added to watchlist (demo)">+ Watchlist</button></div></div></section>
+   <section class="pad2"><h2>Where to watch</h2><div class="prov" id="prov"><span class="note">Loading...</span></div><h2>More like this</h2>
+   <div class="row" style="padding:0">${more.filter(x=>String(x.id)!==String(d.id)).slice(0,8).map(x=>`<div class="mini">${poster(x,"poster gp",`aria-label="${esc(x.title)}"`)}<b>${esc(x.title)}</b></div>`).join("")}</div></section>`;
+  API.providers(type,idv).then(p=>{if(id===rid)$("prov").innerHTML=p.length?p.map(x=>`<a class="pv" href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${esc(x.name)}${x.kind?` <small>${esc(x.kind)}</small>`:""}</a>`).join(""):'<span class="note">No streaming info for this title yet.</span>'}).catch(()=>{if(id===rid)$("prov").innerHTML='<span class="note">Could not load where-to-watch info.</span>'})
+ }catch(e){fail(id,e,()=>detail(type,idv))}}
+function soon(n){++rid;app.innerHTML=`<div class="pad"><h1>${n==="parties"?"Watch Parties":"Live TV"}</h1><p class="note">Coming soon. This page is a placeholder for the real feature.</p></div>`}
+
+/* ---------- router ---------- */
+function route(){clearInterval(timer);const p=location.hash.replace(/^#\/?/,"").split("/").map(decodeURIComponent);const a=p[0]||"";
+ document.querySelectorAll(".pill nav a").forEach(l=>l.toggleAttribute("aria-current",l.dataset.r===a));
+ if(a==="")home();else if(a==="movies")listPage("movie");else if(a==="tv")listPage("tv");else if(a==="title")detail(p[1],p[2]);else if(a==="search")searchPage(p[1]||"");else soon(p[1]||a);
+ window.scrollTo(0,0);$("sform").hidden=true}
+addEventListener("hashchange",route);
+document.addEventListener("click",e=>{
+ const g=e.target.closest("[data-go]");if(g){location.hash="#"+g.dataset.go;return}
+ if(e.target.closest("[data-play]")){const d=window.__cur;d&&d.trailer?open(d.trailer,"_blank","noopener"):toast("Trailer player would open here");return}
+ const t=e.target.closest("[data-t]");if(t)toast(t.dataset.t)});
+$("sbtn").onclick=()=>{$("sform").hidden=!$("sform").hidden;if(!$("sform").hidden)$("sq").focus()};
+$("sform").onsubmit=e=>{e.preventDefault();const q=$("sq").value.trim();if(q)location.hash="#/search/"+encodeURIComponent(q)};
+addEventListener("keydown",e=>{if(e.key==="Escape")$("sform").hidden=true});
+$("jx").onclick=()=>$("join").hidden=true;
+route();
+</script>
+</body>
+</html>
